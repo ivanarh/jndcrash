@@ -10,8 +10,11 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                arguments "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON", "-DENABLE_LIBCORKSCREW:BOOL=ON", "-DENABLE_LIBUNWIND:BOOL=ON", "-DENABLE_LIBUNWINDSTACK:BOOL=ON"
+                arguments "-DANDROID_STL=c++_static", "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON", "-DENABLE_LIBCORKSCREW:BOOL=ON", "-DENABLE_LIBUNWIND:BOOL=ON", "-DENABLE_LIBUNWINDSTACK:BOOL=ON", "-DANDROID_ARM_MODE=arm"
             }
+        }
+        ndk {
+            abiFilters "x86", "armeabi-v7a"
         }
     }
 
