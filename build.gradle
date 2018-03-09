@@ -10,7 +10,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_STL=c++_static", "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON", "-DENABLE_LIBCORKSCREW:BOOL=ON", "-DENABLE_LIBUNWIND:BOOL=ON", "-DENABLE_LIBUNWINDSTACK:BOOL=ON", "-DANDROID_ARM_MODE=arm"
+                arguments "-DANDROID_STL=c++_static", "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON", "-DENABLE_LIBCORKSCREW:BOOL=ON", "-DENABLE_LIBUNWIND:BOOL=ON", "-DENABLE_LIBUNWINDSTACK:BOOL=ON", "-DANDROID_ARM_MODE=arm", "-DENABLE_INPROCESS:BOOL=ON", "-DENABLE_OUTOFPROCESS:BOOL=ON"
             }
         }
         ndk {
