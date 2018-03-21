@@ -47,6 +47,7 @@
       <sourceFolder url="file://$MODULE_DIR$/libndcrash/src/backends/libcorkscrew" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/libndcrash/src/backends/libunwindstack" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/libndcrash/src/backends/cxxabi" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/libndcrash/src/backends/stackscan" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/libndcrash/src/backends/libunwind" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/libndcrash/external/libunwind-ndk/src/x86" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/libndcrash/external/libunwindstack-ndk" isTestSource="false" />
