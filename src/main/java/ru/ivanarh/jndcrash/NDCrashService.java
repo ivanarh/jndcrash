@@ -44,4 +44,8 @@ public class NDCrashService extends Service
     private static boolean mNativeStarted = false;
     private static native void startNativeServer(@Nullable String crashReportPath, int backend);
     private static native void stopNativeServer();
+
+    static {
+        System.loadLibrary("jndcrash");
+    }
 }
