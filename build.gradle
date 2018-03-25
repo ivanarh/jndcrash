@@ -17,7 +17,6 @@ android {
                         "-DENABLE_LIBUNWINDSTACK:BOOL=ON",
                         "-DENABLE_CXXABI:BOOL=ON",
                         "-DENABLE_STACKSCAN:BOOL=ON",
-                        "-DANDROID_ARM_MODE=arm",
                         "-DENABLE_INPROCESS:BOOL=ON",
                         "-DENABLE_OUTOFPROCESS:BOOL=ON"
             }
