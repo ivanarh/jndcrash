@@ -18,7 +18,8 @@ android {
                         "-DENABLE_CXXABI:BOOL=ON",
                         "-DENABLE_STACKSCAN:BOOL=ON",
                         "-DENABLE_INPROCESS:BOOL=ON",
-                        "-DENABLE_OUTOFPROCESS:BOOL=ON"
+                        "-DENABLE_OUTOFPROCESS:BOOL=ON",
+                        "-DSOCKET_NAME=ru.ivanarh.ndcrash.socket"
             }
         }
         ndk {
