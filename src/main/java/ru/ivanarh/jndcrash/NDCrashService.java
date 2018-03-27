@@ -11,7 +11,7 @@ public class NDCrashService extends Service
     private static final String TAG = "JNDCRASH";
 
     public static final String EXTRA_REPORT_FILE = "report_file";
-    public static final String EXTRA_BACKEND = "backend";
+    public static final String EXTRA_UNWINDER = "unwinder";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
@@ -19,7 +19,7 @@ public class NDCrashService extends Service
         if (!mNativeStarted && intent != null) {
             mNativeStarted = true;
             Log.i(TAG, "Starting native crash service...");
-            startNativeServer(intent.getStringExtra(EXTRA_REPORT_FILE), intent.getIntExtra(EXTRA_BACKEND, 0));
+            startNativeServer(intent.getStringExtra(EXTRA_REPORT_FILE), intent.getIntExtra(EXTRA_UNWINDER, 0));
         }
         return Service.START_STICKY;
     }
@@ -42,7 +42,7 @@ public class NDCrashService extends Service
     }
 
     private static boolean mNativeStarted = false;
-    private static native void startNativeServer(@Nullable String crashReportPath, int backend);
+    private static native void startNativeServer(@Nullable String crashReportPath, int unwinder);
     private static native void stopNativeServer();
 
     static {

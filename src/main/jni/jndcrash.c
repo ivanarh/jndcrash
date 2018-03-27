@@ -8,7 +8,7 @@ JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitialize(
         JNIEnv *env,
         jclass type,
         jstring jCrashReportPath,
-        jint backend,
+        jint unwinder,
         jboolean outOfProcess) {
     const char *crashReportPath = NULL;
     if (jCrashReportPath) {
@@ -18,13 +18,13 @@ JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitialize(
     if (outOfProcess) {
         error = ndcrash_out_init();
     } else {
-        error = ndcrash_in_init((enum ndcrash_backend) backend, crashReportPath);
+        error = ndcrash_in_init((enum ndcrash_unwinder) unwinder, crashReportPath);
     }
     __android_log_print(ANDROID_LOG_DEBUG,
                         LOG_TAG,
-                        "JNDCrash initialization, path: %s, backend: %d, out of process: %s, result: %d",
+                        "JNDCrash initialization, path: %s, unwinder: %d, out of process: %s, result: %d",
                         crashReportPath ? crashReportPath : "null",
-                        backend,
+                        unwinder,
                         outOfProcess ? "true" : "false",
                         (int) error);
     if (jCrashReportPath) {
@@ -34,13 +34,15 @@ JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitialize(
 
 JNIEXPORT void JNICALL
 Java_ru_ivanarh_jndcrash_NDCrashService_startNativeServer(JNIEnv *env, jclass type,
-                                                          jstring crashReportPath_, jint backend) {
+                                                          jstring crashReportPath_, jint unwinder) {
     const char *crashReportPath = (*env)->GetStringUTFChars(env, crashReportPath_, 0);
-    const enum ndcrash_error error = ndcrash_out_start_daemon((enum ndcrash_backend) backend, crashReportPath);
+    const enum ndcrash_error error = ndcrash_out_start_daemon(
+            (enum ndcrash_unwinder) unwinder,
+            crashReportPath);
     __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG,
-                        "JNDCrash out-of-process daemon starting, path: %s, backend: %d, result: %d",
+                        "JNDCrash out-of-process daemon starting, path: %s, unwinder: %d, result: %d",
                         crashReportPath ? crashReportPath : "null",
-                        backend,
+                        unwinder,
                         (int) error);
     (*env)->ReleaseStringUTFChars(env, crashReportPath_, crashReportPath);
 }
