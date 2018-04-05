@@ -2,8 +2,6 @@
 #include <jni.h>
 #include <malloc.h>
 
-static const char LOG_TAG[] = "JNDCRASH";
-
 // NDCrash.java methods
 
 JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeInProcess(
@@ -11,6 +9,7 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeInProces
         jclass type,
         jstring jCrashReportPath,
         jint unwinder) {
+#ifdef ENABLE_INPROCESS
     const char *crashReportPath = NULL;
     if (jCrashReportPath) {
         crashReportPath = (*env)->GetStringUTFChars(env, jCrashReportPath, NULL);
@@ -20,34 +19,50 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeInProces
         (*env)->ReleaseStringUTFChars(env, jCrashReportPath, crashReportPath);
     }
     return (jint) error;
+#else
+    return (jint) ndcrash_error_not_supported;
+#endif
 }
 
 JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_deInitializeInProcess(
         JNIEnv *env,
         jclass type) {
+#ifdef ENABLE_INPROCESS
     ndcrash_in_deinit();
+#endif
 }
 
 JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeOutOfProcess(
         JNIEnv *env,
         jclass type) {
+#ifdef ENABLE_OUTOFPROCESS
     const enum ndcrash_error error = ndcrash_out_init();
     return (jint) error;
+#else
+    return (jint) ndcrash_error_not_supported;
+#endif
 }
 
 JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_deInitializeOutOfProcess(
         JNIEnv *env,
         jclass type) {
+#ifdef ENABLE_OUTOFPROCESS
     ndcrash_out_deinit();
+#endif
 }
 
+#ifdef ENABLE_OUTOFPROCESS
+
+/// JavaVM instance. We use it to run.
 JavaVM * jndcrash_javavm = NULL;
 
+/// Called when a native library is loaded.
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     jndcrash_javavm = vm;
     return JNI_VERSION_1_4;
 }
 
+/// Called when a native library is unloaded.
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     jndcrash_javavm = NULL;
 }
@@ -87,11 +102,14 @@ static void jndcrash_daemon_stop(void *argvoid) {
     (*jndcrash_javavm)->DetachCurrentThread(jndcrash_javavm);
 }
 
+#endif //ENABLE_OUTOFPROCESS
+
 JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_startOutOfProcessDaemon(
         JNIEnv *env,
         jclass type,
         jstring crashReportPath_,
         jint unwinder) {
+#ifdef ENABLE_OUTOFPROCESS
     const char *crashReportPath = NULL;
     if (crashReportPath_) {
         crashReportPath = (*env)->GetStringUTFChars(env, crashReportPath_, 0);
@@ -114,13 +132,20 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_startOutOfProcessDaemon(
     }
 
     return (jint) error;
+#else
+    return (jint) ndcrash_error_not_supported;
+#endif //ENABLE_OUTOFPROCESS
 }
 
 JNIEXPORT jboolean JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeStopOutOfProcessDaemon(JNIEnv *env, jclass type) {
+#ifdef ENABLE_OUTOFPROCESS
     jndcrash_callback_arg_t * const arg = (jndcrash_callback_arg_t *) ndcrash_out_get_daemon_callbacks_arg();
     if (arg) {
         (*env)->DeleteGlobalRef(env, arg->jc_NDCrash);
         free(arg);
     }
     return (jboolean) ndcrash_out_stop_daemon();
+#else
+    return (jboolean) false;
+#endif //ENABLE_OUTOFPROCESS
 }
