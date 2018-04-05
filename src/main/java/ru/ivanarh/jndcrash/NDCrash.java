@@ -1,5 +1,7 @@
 package ru.ivanarh.jndcrash;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
@@ -29,14 +31,15 @@ public class NDCrash {
     /**
      * Initializes NDCrash library signal handler using out-of-process mode.
      *
+     * @param context Context instance. Used to determine a socket name.
      * @return Error status.
      */
-    public static Error initializeOutOfProcess() {
-        return Error.values()[nativeInitializeOutOfProcess()];
+    public static Error initializeOutOfProcess(Context context) {
+        return Error.values()[nativeInitializeOutOfProcess(getSocketName(context))];
     }
 
     /// Native implementation method.
-    private static native int nativeInitializeOutOfProcess();
+    private static native int nativeInitializeOutOfProcess(@NonNull String socketName);
 
     /**
      * De-initializes NDCrash library signal handler using out-of-process mode.
@@ -47,15 +50,17 @@ public class NDCrash {
      * Starts NDCrash out-of-process unwinding daemon. This is necessary for out of process crash
      * handling. This method should be run from a service that works in separate process.
      *
+     * @param context Context instance. Used to determine a socket name.
      * @param crashReportPath Path where to save a crash report.
      * @param unwinder Unwinder to use.
      */
     public static Error startOutOfProcessDaemon(
+            Context context,
             @Nullable String crashReportPath,
             Unwinder unwinder,
             @Nullable OnCrashCallback callback) {
         mOnCrashCallback = callback;
-        final Error result = Error.values()[startOutOfProcessDaemon(crashReportPath, unwinder.ordinal())];
+        final Error result = Error.values()[startOutOfProcessDaemon(getSocketName(context), crashReportPath, unwinder.ordinal())];
         if (result != Error.ok) {
             mOnCrashCallback = null;
         }
@@ -63,7 +68,10 @@ public class NDCrash {
     }
 
     /// Native implementation method.
-    private static native int startOutOfProcessDaemon(@Nullable String crashReportPath, int unwinder);
+    private static native int startOutOfProcessDaemon(
+            @NonNull String socketName,
+            @Nullable String crashReportPath,
+            int unwinder);
 
     /**
      * Stops NDCrash out-of-process unwinding daemon.
@@ -93,6 +101,17 @@ public class NDCrash {
         if (callback != null) {
             callback.onCrash(reportPath);
         }
+    }
+
+    /**
+     * Retrieves a socket name from Context instance. We use a package name with additional suffix
+     * to make sure that socket name doesn't intersect with another application.
+     *
+     * @param context Context to use.
+     * @return Socket name.
+     */
+    private static String getSocketName(Context context) {
+        return context.getPackageName() + ".ndcrash";
     }
 
     /**

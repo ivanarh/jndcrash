@@ -34,9 +34,14 @@ JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_deInitializeInProcess(
 
 JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeOutOfProcess(
         JNIEnv *env,
-        jclass type) {
+        jclass type,
+        jstring jSocketName) {
 #ifdef ENABLE_OUTOFPROCESS
-    const enum ndcrash_error error = ndcrash_out_init();
+    const char *socket_name = jSocketName ? (*env)->GetStringUTFChars(env, jSocketName, NULL) : NULL;
+    const enum ndcrash_error error = ndcrash_out_init(socket_name);
+    if (socket_name) {
+        (*env)->ReleaseStringUTFChars(env, jSocketName, socket_name);
+    }
     return (jint) error;
 #else
     return (jint) ndcrash_error_not_supported;
@@ -107,19 +112,22 @@ static void jndcrash_daemon_stop(void *argvoid) {
 JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_startOutOfProcessDaemon(
         JNIEnv *env,
         jclass type,
-        jstring crashReportPath_,
+        jstring jSocketName,
+        jstring jCrashReportPath,
         jint unwinder) {
 #ifdef ENABLE_OUTOFPROCESS
     const char *crashReportPath = NULL;
-    if (crashReportPath_) {
-        crashReportPath = (*env)->GetStringUTFChars(env, crashReportPath_, 0);
+    if (jCrashReportPath) {
+        crashReportPath = (*env)->GetStringUTFChars(env, jCrashReportPath, 0);
     }
+    const char *socket_name = jSocketName ? (*env)->GetStringUTFChars(env, jSocketName, NULL) : NULL;
 
     jndcrash_callback_arg_t * const arg = calloc(1, sizeof(jndcrash_callback_arg_t));
     arg->jc_NDCrash = (*env)->NewGlobalRef(env, type);
     arg->jm_runOnCrashCallback = (*env)->GetStaticMethodID(env, arg->jc_NDCrash, "runOnCrashCallback", "(Ljava/lang/String;)V");
 
     const enum ndcrash_error error = ndcrash_out_start_daemon(
+            socket_name,
             (enum ndcrash_unwinder) unwinder,
             crashReportPath,
             &jndcrash_daemon_start,
@@ -128,7 +136,10 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_startOutOfProcessDaemon(
             arg);
 
     if (crashReportPath) {
-        (*env)->ReleaseStringUTFChars(env, crashReportPath_, crashReportPath);
+        (*env)->ReleaseStringUTFChars(env, jCrashReportPath, crashReportPath);
+    }
+    if (socket_name) {
+        (*env)->ReleaseStringUTFChars(env, jSocketName, socket_name);
     }
 
     return (jint) error;
