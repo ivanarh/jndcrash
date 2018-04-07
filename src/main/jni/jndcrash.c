@@ -24,7 +24,7 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeInProces
 #endif
 }
 
-JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_deInitializeInProcess(
+JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeDeInitializeInProcess(
         JNIEnv *env,
         jclass type) {
 #ifdef ENABLE_INPROCESS
@@ -48,7 +48,7 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeOutOfPro
 #endif
 }
 
-JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_deInitializeOutOfProcess(
+JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeDeInitializeOutOfProcess(
         JNIEnv *env,
         jclass type) {
 #ifdef ENABLE_OUTOFPROCESS
@@ -109,7 +109,7 @@ static void jndcrash_daemon_stop(void *argvoid) {
 
 #endif //ENABLE_OUTOFPROCESS
 
-JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_startOutOfProcessDaemon(
+JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeStartOutOfProcessDaemon(
         JNIEnv *env,
         jclass type,
         jstring jSocketName,

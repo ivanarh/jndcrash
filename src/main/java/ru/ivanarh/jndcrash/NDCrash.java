@@ -26,7 +26,12 @@ public class NDCrash {
     /**
      * De-initializes NDCrash library signal handler using in-process mode.
      */
-    public static native void deInitializeInProcess();
+    public static void deInitializeInProcess() {
+        nativeDeInitializeInProcess();
+    }
+
+    /// Native implementation method.
+    private static native void nativeDeInitializeInProcess();
 
     /**
      * Initializes NDCrash library signal handler using out-of-process mode.
@@ -44,7 +49,12 @@ public class NDCrash {
     /**
      * De-initializes NDCrash library signal handler using out-of-process mode.
      */
-    public static native void deInitializeOutOfProcess();
+    public static void deInitializeOutOfProcess() {
+        nativeDeInitializeOutOfProcess();
+    }
+
+    /// Native implementation method.
+    private static native void nativeDeInitializeOutOfProcess();
 
     /**
      * Starts NDCrash out-of-process unwinding daemon. This is necessary for out of process crash
@@ -60,7 +70,7 @@ public class NDCrash {
             Unwinder unwinder,
             @Nullable OnCrashCallback callback) {
         mOnCrashCallback = callback;
-        final Error result = Error.values()[startOutOfProcessDaemon(getSocketName(context), crashReportPath, unwinder.ordinal())];
+        final Error result = Error.values()[nativeStartOutOfProcessDaemon(getSocketName(context), crashReportPath, unwinder.ordinal())];
         if (result != Error.ok) {
             mOnCrashCallback = null;
         }
@@ -68,7 +78,7 @@ public class NDCrash {
     }
 
     /// Native implementation method.
-    private static native int startOutOfProcessDaemon(
+    private static native int nativeStartOutOfProcessDaemon(
             @NonNull String socketName,
             @Nullable String crashReportPath,
             int unwinder);
