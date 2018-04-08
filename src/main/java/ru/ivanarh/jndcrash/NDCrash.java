@@ -69,6 +69,9 @@ public class NDCrash {
             @Nullable String crashReportPath,
             Unwinder unwinder,
             @Nullable OnCrashCallback callback) {
+        if (NDCrashUtils.isMainProcess(context)) {
+            return Error.error_wrong_process;
+        }
         mOnCrashCallback = callback;
         final Error result = Error.values()[nativeStartOutOfProcessDaemon(getSocketName(context), crashReportPath, unwinder.ordinal())];
         if (result != Error.ok) {
