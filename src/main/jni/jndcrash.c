@@ -24,11 +24,13 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeInProces
 #endif
 }
 
-JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeDeInitializeInProcess(
+JNIEXPORT jboolean JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeDeInitializeInProcess(
         JNIEnv *env,
         jclass type) {
 #ifdef ENABLE_INPROCESS
-    ndcrash_in_deinit();
+    return (jboolean) ndcrash_in_deinit();
+#else
+    return (jboolean) false;
 #endif
 }
 
@@ -48,11 +50,13 @@ JNIEXPORT jint JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeInitializeOutOfPro
 #endif
 }
 
-JNIEXPORT void JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeDeInitializeOutOfProcess(
+JNIEXPORT jboolean JNICALL Java_ru_ivanarh_jndcrash_NDCrash_nativeDeInitializeOutOfProcess(
         JNIEnv *env,
         jclass type) {
 #ifdef ENABLE_OUTOFPROCESS
-    ndcrash_out_deinit();
+    return (jboolean) ndcrash_out_deinit();
+#else
+    return (jboolean) false;
 #endif
 }
 

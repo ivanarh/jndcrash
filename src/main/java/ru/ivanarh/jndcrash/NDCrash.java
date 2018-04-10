@@ -26,12 +26,12 @@ public class NDCrash {
     /**
      * De-initializes NDCrash library signal handler using in-process mode.
      */
-    public static void deInitializeInProcess() {
-        nativeDeInitializeInProcess();
+    public static boolean deInitializeInProcess() {
+        return nativeDeInitializeInProcess();
     }
 
     /// Native implementation method.
-    private static native void nativeDeInitializeInProcess();
+    private static native boolean nativeDeInitializeInProcess();
 
     /**
      * Initializes NDCrash library signal handler using out-of-process mode.
@@ -49,12 +49,12 @@ public class NDCrash {
     /**
      * De-initializes NDCrash library signal handler using out-of-process mode.
      */
-    public static void deInitializeOutOfProcess() {
-        nativeDeInitializeOutOfProcess();
+    public static boolean deInitializeOutOfProcess() {
+        return nativeDeInitializeOutOfProcess();
     }
 
     /// Native implementation method.
-    private static native void nativeDeInitializeOutOfProcess();
+    private static native boolean nativeDeInitializeOutOfProcess();
 
     /**
      * Starts NDCrash out-of-process unwinding daemon. This is necessary for out of process crash
