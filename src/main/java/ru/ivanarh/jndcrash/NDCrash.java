@@ -16,8 +16,8 @@ public class NDCrash {
      * @param unwinder        Used unwinder. See ndcrash_unwinder type in ndcrash.h.
      * @return Error status.
      */
-    public static Error initializeInProcess(@Nullable String crashReportPath, Unwinder unwinder) {
-        return Error.values()[nativeInitializeInProcess(crashReportPath, unwinder.ordinal())];
+    public static NDCrashError initializeInProcess(@Nullable String crashReportPath, NDCrashUnwinder unwinder) {
+        return NDCrashError.values()[nativeInitializeInProcess(crashReportPath, unwinder.ordinal())];
     }
 
     /// Native implementation method.
@@ -39,8 +39,8 @@ public class NDCrash {
      * @param context Context instance. Used to determine a socket name.
      * @return Error status.
      */
-    public static Error initializeOutOfProcess(Context context) {
-        return Error.values()[nativeInitializeOutOfProcess(getSocketName(context))];
+    public static NDCrashError initializeOutOfProcess(Context context) {
+        return NDCrashError.values()[nativeInitializeOutOfProcess(getSocketName(context))];
     }
 
     /// Native implementation method.
@@ -64,17 +64,17 @@ public class NDCrash {
      * @param crashReportPath Path where to save a crash report.
      * @param unwinder Unwinder to use.
      */
-    public static Error startOutOfProcessDaemon(
+    public static NDCrashError startOutOfProcessDaemon(
             Context context,
             @Nullable String crashReportPath,
-            Unwinder unwinder,
+            NDCrashUnwinder unwinder,
             @Nullable OnCrashCallback callback) {
         if (NDCrashUtils.isMainProcess(context)) {
-            return Error.error_wrong_process;
+            return NDCrashError.error_wrong_process;
         }
         mOnCrashCallback = callback;
-        final Error result = Error.values()[nativeStartOutOfProcessDaemon(getSocketName(context), crashReportPath, unwinder.ordinal())];
-        if (result != Error.ok) {
+        final NDCrashError result = NDCrashError.values()[nativeStartOutOfProcessDaemon(getSocketName(context), crashReportPath, unwinder.ordinal())];
+        if (result != NDCrashError.ok) {
             mOnCrashCallback = null;
         }
         return result;

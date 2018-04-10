@@ -35,10 +35,10 @@ public class NDCrashService extends Service implements NDCrash.OnCrashCallback
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!mDaemonStarted && intent != null) {
             mDaemonStarted = true;
-            final Unwinder unwinder = Unwinder.values()[intent.getIntExtra(EXTRA_UNWINDER, Unwinder.libunwind.ordinal())];
+            final NDCrashUnwinder unwinder = NDCrashUnwinder.values()[intent.getIntExtra(EXTRA_UNWINDER, NDCrashUnwinder.libunwind.ordinal())];
             final String reportPath = intent.getStringExtra(EXTRA_REPORT_FILE);
-            final Error initResult = NDCrash.startOutOfProcessDaemon(this, reportPath, unwinder, this);
-            if (initResult != Error.ok) {
+            final NDCrashError initResult = NDCrash.startOutOfProcessDaemon(this, reportPath, unwinder, this);
+            if (initResult != NDCrashError.ok) {
                 Log.e(TAG, "Couldn't start NDCrash out-of-process daemon with unwinder: " + unwinder + ", error: " + initResult);
             } else {
                 Log.i(TAG, "Out-of-process unwinding daemon is started with unwinder: " + unwinder + " report path: " +
@@ -76,6 +76,6 @@ public class NDCrashService extends Service implements NDCrash.OnCrashCallback
      * @param reportPath Path to crash report file.
      * @param result Start result.
      */
-    protected void onDaemonStart(Unwinder unwinder, String reportPath, Error result) {
+    protected void onDaemonStart(NDCrashUnwinder unwinder, String reportPath, NDCrashError result) {
     }
 }
