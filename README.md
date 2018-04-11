@@ -103,3 +103,40 @@ And, or course, you need to update a service starting code:
 ```
 
 Please keep in mind that onCrash is run from background thread created by *pthread*. It means it doesn't have a Looper instance. Also note that when `onCrash` method is running other crash report can't be created, it means a very long blocking operation in it is unwanted.
+
+## Customization ##
+
+For optimization purposes you can customize **NDCrash** library, see *Customization* section in [NDCrash docs](https://github.com/ivanarh/ndcrash)
+Since **JNDCrash** is a wrapper, it's customized along with underlying library with the same parameters passed by CMake variables. You always can create a fork of these libraries and set parameters, for example, to build.gradle file of **JNDCrash**:
+
+```
+android {
+	...
+    defaultConfig {
+    	...
+		externalNativeBuild {
+		    cmake {
+		        arguments "-DANDROID_STL=c++_static", "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+		    }
+		}
+	}
+}
+```
+
+If you don't wish to create a fork you can use a following ability to customize enabled modules set of **JNDCrash**: You can create `jndcrash.cmake` file in the same directory where **JNDCrash** submodule is cloned, for example see this file in [demo application](https://github.com/ivanarh/ndcrashdemo). Here is example contents of this file:
+
+```
+# Modes.
+set(ENABLE_INPROCESS ON)
+set(ENABLE_OUTOFPROCESS ON)
+
+# Unwinders.
+set(ENABLE_LIBCORKSCREW ON)
+set(ENABLE_LIBUNWIND ON)
+set(ENABLE_LIBUNWINDSTACK ON)
+set(ENABLE_CXXABI ON)
+set(ENABLE_STACKSCAN ON)
+```
+
+By default, if this file is absent, all modes all modes and unwinders are switched on. Don't forget that you should initialize crash reporting library with supported mode and supported unwinder, otherwise an initialization will fail.
+
