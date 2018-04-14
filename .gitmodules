@@ -1,3 +1,3 @@
 [submodule "libndcrash"]
 	path = libndcrash
-	url = git@bitbucket.org:ivanarh/libndcrash.git
+	url = git@github.com:ivanarh/ndcrash.git
