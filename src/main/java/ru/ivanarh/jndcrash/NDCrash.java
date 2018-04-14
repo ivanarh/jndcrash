@@ -25,6 +25,8 @@ public class NDCrash {
 
     /**
      * De-initializes NDCrash library signal handler using in-process mode.
+     *
+     * @return Flag whether de-initialization was successful.
      */
     public static boolean deInitializeInProcess() {
         return nativeDeInitializeInProcess();
@@ -48,6 +50,8 @@ public class NDCrash {
 
     /**
      * De-initializes NDCrash library signal handler using out-of-process mode.
+     *
+     * @return Flag whether de-initialization was successful.
      */
     public static boolean deInitializeOutOfProcess() {
         return nativeDeInitializeOutOfProcess();
@@ -63,6 +67,7 @@ public class NDCrash {
      * @param context Context instance. Used to determine a socket name.
      * @param crashReportPath Path where to save a crash report.
      * @param unwinder Unwinder to use.
+     * @return Error status.
      */
     public static NDCrashError startOutOfProcessDaemon(
             Context context,
@@ -88,6 +93,8 @@ public class NDCrash {
 
     /**
      * Stops NDCrash out-of-process unwinding daemon.
+     *
+     * @return Flag whether daemon stopping was successful.
      */
     public static boolean stopOutOfProcessDaemon() {
         final boolean result = nativeStopOutOfProcessDaemon();
