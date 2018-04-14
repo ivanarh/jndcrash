@@ -1,11 +1,52 @@
 # JNDCrash #
 
-**JNDCrash** is a Java wrapper over [NDCrash C library](https://github.com/ivanarh/ndcrash) which significantly simplifies its usage. It includes **NDCrash** library as a submodule. See key concepts here https://github.com/ivanarh/ndcrash documentation.
+**JNDCrash** is a Java wrapper over [NDCrash C library](https://github.com/ivanarh/ndcrash) which significantly simplifies its usage. It includes **NDCrash** library as a submodule. See key concepts here https://github.com/ivanarh/ndcrash documentation. Minimum Android version is 4.0.3.
 
 ## Integration ##
 
-**JNDCrash** currently has experimental status an isn't published to any Maven repository. A recommended way to include it to a project is to add a submodule. Please note that 3 version of gradle is used. It's integrated to a project as a usual library, see [documentation](https://developer.android.com/studio/projects/android-library.html)
-For example integraion please take a look at [ndcrashdemo application](https://github.com/ivanarh/ndcrashdemo).
+### Quick integration ###
+
+**JNDCrash** is currently published to [bintray repository](https://bintray.com/ivanarh/ndcrash/jndcrash-libunwind) and accessible in jcenter. Currently only one version with *libunwind* unwinder is accessible, it means other unwinders are disabled during compilation and can't be used. You should initialize a library with `NDCrashUnwinder.libunwind` argument, otherwise it will return an error. This is done for optimization purposes, this unwinder is a good choice for majority of users and it's recommended to use. If you need another unwinder please go to "Advanced integration" and "Customization" sections.
+
+To add a library to a project please add this line to your application's build.gradle, `dependencies` section:
+
+```
+compile 'ru.ivanarh.ndcrash:jndcrash-libunwind:0.1'
+```
+
+Also make sure that `jcenter()` is included to `repositories` section (it's already done in default project template). Run "Sync" operation and verify that no error has occured.
+
+### Advanced integration ###
+
+A more advanced way to include it to a project is to a project hierarchy. Please note that gradle version 3 is used. It's integrated to a project as a usual library, see [documentation](https://developer.android.com/studio/projects/android-library.html) For example integraion you can take a look at [ndcrashdemo application](https://github.com/ivanarh/ndcrashdemo). The following instructions assume that you use a default project template provided by Android Studio. A fresh version of Android NDK with clang toolchain should be installed.
+
+First you need to add **JNDCrash** to a project root. If you use **git** in your project it's a good idea integrate **JNDCrash** as a submodule. To do this please run a following console command in a project root:
+
+```
+git submodule add git@github.com:ivanarh/jndcrash.git jndcrash
+cd jndcrash
+git submodule update --init --recursive
+```
+
+If you don't use git please replace `git submodule add` command by `git clone` with the same arguments. Verify that no error has occured. After that please change `settings.gradle` file, replace a line:
+
+```
+include ':app'
+```
+
+to
+
+```
+include ':app', ':jndcrash'
+```
+
+After that please add this line to your application's build.gradle, `dependencies` section:
+
+```
+implementation project(':jndcrash')
+```
+
+Run "Sync" operation and verify that no error has occured.
 
 ## Usage ##
 
