@@ -11,7 +11,7 @@
 To add a library to a project please add this line to your application's build.gradle, `dependencies` section:
 
 ```
-compile 'ru.ivanarh.ndcrash:jndcrash-libunwind:0.1'
+compile 'ru.ivanarh.ndcrash:jndcrash-libunwind:0.2'
 ```
 
 Also make sure that `jcenter()` is included to `repositories` section (it's already done in default project template). Run "Sync" operation and verify that no error has occured.
@@ -87,35 +87,29 @@ First you need to declare a new service that will work in a parallel process, pl
 
 Note that ":reportprocess" is just string used for a process name, it doesn't affect library work but should be set.
 
-Next you need to add some code that initializes a signal handler and starts out service. A recommended place for it is `onCreate` method of Application subclass. **One important detail:** Code that initializes a signal handler must be run only from main application process, not from background service process. The problem is that `onCreate` method is called for both processes and we need a way to determine if it's being run in a main process. For this purpose `NDCrashUtils.isMainProcess` method may be used.
-
-For a signal handler initialization please call `NDCrash.initializeOutOfProcess` method. You need to pass a Context instance and don't need to specify a socket name, a package name with additional ".ndcrash" suffix will be used for this.
-To specify a crash report output file path and an unwinder you need to pass this data to extras of Intent that will be used to start a service. A report passed as a string, an unwinder should be passed as an ordinal integer value of `NDCrashUnwinder` enum.
-
-An example initialization code is below, assuming it's located in `onCreate` method of Application subclass.
+Next you need to add some code that initializes a signal handler and starts a service. You should add this code to `onCreate` method of your Application subclass. It will register a signal handler and will start a background service that will use specified unwinder and report path. A class of starting background service should be provided in this point (it should be the same with declared in AndroidManifest.xml). This is an example:
 
 ```
-    @Override
-    public void onCreate() {
-		super.onCreate();
-		...
-		if (NDCrashUtils.isMainProcess(this)) {
-			final NDCrashError error = NDCrash.initializeOutOfProcess(this);
-			if (error == NDCrashError.ok) {
-
-			} else {
-
-			}
-
-			final Intent serviceIntent = new Intent(context, NDCrashService.class);
-			final String reportPath = getFilesDir().getAbsolutePath() + "/crash.txt"; // Example.
-	        serviceIntent.putExtra(NDCrashService.EXTRA_REPORT_FILE, reportPath);
-	        serviceIntent.putExtra(NDCrashService.EXTRA_UNWINDER, NDCrashUnwinder.libunwind.ordinal());
-	        startService(serviceIntent);
-		}
-		...
+@Override
+public void onCreate() {
+	super.onCreate();
+	final String reportPath = getFilesDir().getAbsolutePath() + "/crash.txt"; // Example.
+	final NDCrashError error = NDCrash.initializeOutOfProcess(
+			this,
+			reportPath,
+			NDCrashUnwinder.libunwind,
+			NDCrashService.class);
+	if (error == NDCrashError.ok) {
+		// Initialization is successful.
+	} else {
+		// Initialization failed, check error value.
 	}
+}
 ```
+
+Some important details: `onCreate()` method is run for all processes of an application including background crash service process. The `NDCrash.initializeOutOfProcess` method checks if it's run from crash service process. If yes it doesn't do anything and return NDCrashError.ok value, we don't need to register a signal handler for background process.
+
+If your application has a lot of processes you can add additional check and initialize a library only for processes that use NDK code (for optimization). But keep in mind that a library must be initialized from main process of an application anyway. It should be done because a service is started only from the main process of an application. You can use `NDCrashUtils.isMainProcess` to check this situation.
 
 ### Immediate crash handling ###
 
@@ -135,12 +129,12 @@ Also a service declaration in AndroidManifest.xml should be updated:
 <service android:name=".CrashService" android:process=":reportprocess"/>
 ```
 
-And, or course, you need to update a service starting code:
+And, or course, you need to update a library initialization code, it should provide actual `serviceClass` argument:
 
 ```
-			final Intent serviceIntent = new Intent(context, CrashService.class);
-			// Set extras...
-	        startService(serviceIntent);
+final NDCrashError error = NDCrash.initializeOutOfProcess(
+		...
+		CrashService.class);
 ```
 
 Please keep in mind that onCrash is run from background thread created by *pthread*. It means it doesn't have a Looper instance. Also note that when `onCrash` method is running other crash report can't be created, it means a very long blocking operation in it is unwanted.

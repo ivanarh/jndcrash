@@ -1,6 +1,7 @@
 package ru.ivanarh.jndcrash;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -36,12 +37,38 @@ public class NDCrash {
     private static native boolean nativeDeInitializeInProcess();
 
     /**
-     * Initializes NDCrash library signal handler using out-of-process mode.
+     * Initializes NDCrash library signal handler using out-of-process mode. Should be called from
+     * onCreate() method of your subclass of Application.
      *
-     * @param context Context instance. Used to determine a socket name.
+     * @param context         Context instance. Used to determine a socket name and start a service.
+     * @param crashReportPath Path where a crash report is saved.
+     * @param unwinder        Used unwinder. See ndcrash_unwinder type in ndcrash.h.
+     * @param serviceClass    Class of background service. Used when we need to use a custom subclass
+     *                        of NDCrashUnwinder to use as a background service. If you didn't subclass
+     *                        NDCrashUnwinder, please pass NDCrashUnwinder.class.
      * @return Error status.
      */
-    public static NDCrashError initializeOutOfProcess(Context context) {
+    public static NDCrashError initializeOutOfProcess(
+            @NonNull Context context,
+            @Nullable String crashReportPath,
+            @NonNull NDCrashUnwinder unwinder,
+            @NonNull Class<? extends NDCrashService> serviceClass) {
+        if (NDCrashUtils.isCrashServiceProcess(context, serviceClass)) {
+            // If it's a background crash service process we don't need to initialize anything,
+            // we treat this situation as no error because this method is designed to call from
+            // Application.onCreate().
+            return NDCrashError.ok;
+        }
+        // Saving service class, we should be able to stop it on de-initialization.
+        mServiceClass = serviceClass;
+        // Starting crash reporting service. Only from main process.
+        if (NDCrashUtils.isMainProcess(context)) {
+            final Intent serviceIntent = new Intent(context, serviceClass);
+            serviceIntent.putExtra(NDCrashService.EXTRA_REPORT_FILE, crashReportPath);
+            serviceIntent.putExtra(NDCrashService.EXTRA_UNWINDER, unwinder.ordinal());
+            context.startService(serviceIntent);
+        }
+        // Initializing signal handler.
         return NDCrashError.values()[nativeInitializeOutOfProcess(getSocketName(context))];
     }
 
@@ -51,9 +78,14 @@ public class NDCrash {
     /**
      * De-initializes NDCrash library signal handler using out-of-process mode.
      *
+     * @param context Context instance. Used to stop a service.
      * @return Flag whether de-initialization was successful.
      */
-    public static boolean deInitializeOutOfProcess() {
+    public static boolean deInitializeOutOfProcess(@NonNull Context context) {
+        if (mServiceClass != null) {
+            context.stopService(new Intent(context, mServiceClass));
+            mServiceClass = null;
+        }
         return nativeDeInitializeOutOfProcess();
     }
 
@@ -62,17 +94,18 @@ public class NDCrash {
 
     /**
      * Starts NDCrash out-of-process unwinding daemon. This is necessary for out of process crash
-     * handling. This method should be run from a service that works in separate process.
+     * handling. This method is run from a service that works in separate process.
      *
-     * @param context Context instance. Used to determine a socket name.
+     * @param context         Context instance. Used to determine a socket name.
      * @param crashReportPath Path where to save a crash report.
-     * @param unwinder Unwinder to use.
+     * @param unwinder        Unwinder to use.
+     * @param callback        Callback to execute when a crash has occurred.
      * @return Error status.
      */
-    public static NDCrashError startOutOfProcessDaemon(
-            Context context,
+    static NDCrashError startOutOfProcessDaemon(
+            @NonNull Context context,
             @Nullable String crashReportPath,
-            NDCrashUnwinder unwinder,
+            @NonNull NDCrashUnwinder unwinder,
             @Nullable OnCrashCallback callback) {
         if (NDCrashUtils.isMainProcess(context)) {
             return NDCrashError.error_wrong_process;
@@ -96,7 +129,7 @@ public class NDCrash {
      *
      * @return Flag whether daemon stopping was successful.
      */
-    public static boolean stopOutOfProcessDaemon() {
+    static boolean stopOutOfProcessDaemon() {
         final boolean result = nativeStopOutOfProcessDaemon();
         mOnCrashCallback = null;
         return result;
@@ -110,6 +143,12 @@ public class NDCrash {
      */
     @Nullable
     private static volatile OnCrashCallback mOnCrashCallback = null;
+
+    /**
+     * Background service class for out-of-process mode.
+     */
+    @Nullable
+    private static Class<? extends NDCrashService> mServiceClass = null;
 
     /**
      * Runs on crash callback if it was set. This method is called from native code.
@@ -130,7 +169,7 @@ public class NDCrash {
      * @param context Context to use.
      * @return Socket name.
      */
-    private static String getSocketName(Context context) {
+    private static String getSocketName(@NonNull Context context) {
         return context.getPackageName() + ".ndcrash";
     }
 
