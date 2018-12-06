@@ -46,7 +46,8 @@ public class NDCrashService extends Service implements NDCrash.OnCrashCallback
                 onDaemonStart(unwinder, reportPath, initResult);
             }
         }
-        return Service.START_STICKY;
+        // We should preserve Intent from being lost when a process has been killed.
+        return Service.START_REDELIVER_INTENT;
     }
 
     @Override @CallSuper
