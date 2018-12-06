@@ -4,6 +4,7 @@ project(jndcrash)
 # Setting default configuration parameters values. Everything is ON.
 set(ENABLE_INPROCESS ON)
 set(ENABLE_OUTOFPROCESS ON)
+set(ENABLE_OUTOFPROCESS_ALL_THREADS ON)
 set(ENABLE_LIBCORKSCREW ON)
 set(ENABLE_LIBUNWIND ON)
 set(ENABLE_LIBUNWINDSTACK ON)

@@ -11,7 +11,7 @@
 To add a library to a project please add this line to your application's build.gradle, `dependencies` section:
 
 ```
-compile 'ru.ivanarh.ndcrash:jndcrash-libunwind:0.2'
+compile 'ru.ivanarh.ndcrash:jndcrash-libunwind:0.3'
 ```
 
 Also make sure that `jcenter()` is included to `repositories` section (it's already done in default project template). Run "Sync" operation and verify that no error has occured.
@@ -164,6 +164,7 @@ If you don't wish to create a fork you can use a following ability to customize 
 # Modes.
 set(ENABLE_INPROCESS ON)
 set(ENABLE_OUTOFPROCESS ON)
+set(ENABLE_OUTOFPROCESS_ALL_THREADS ON)
 
 # Unwinders.
 set(ENABLE_LIBCORKSCREW ON)
