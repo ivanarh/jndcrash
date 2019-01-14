@@ -27,4 +27,7 @@ public enum NDCrashError {
 
     /// Wron process error. Happens if we try to initialize an out-of-process daemon from a main process.
     error_wrong_process,
+
+    /// A background out-of-process service has failed to start.
+    error_service_start_failed,
 }

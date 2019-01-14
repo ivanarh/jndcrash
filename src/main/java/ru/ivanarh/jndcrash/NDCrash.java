@@ -66,7 +66,11 @@ public class NDCrash {
             final Intent serviceIntent = new Intent(context, serviceClass);
             serviceIntent.putExtra(NDCrashService.EXTRA_REPORT_FILE, crashReportPath);
             serviceIntent.putExtra(NDCrashService.EXTRA_UNWINDER, unwinder.ordinal());
-            context.startService(serviceIntent);
+            try {
+                context.startService(serviceIntent);
+            } catch (RuntimeException e) {
+                return NDCrashError.error_service_start_failed;
+            }
         }
         // Initializing signal handler.
         return NDCrashError.values()[nativeInitializeOutOfProcess(getSocketName(context))];
